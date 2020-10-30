@@ -72,7 +72,7 @@ const prtconfig={
       "events": {
         "onhover": {
           "enable": true,
-          "mode": "bubble"
+          "mode": "grab"
         },
         "onclick": {
           "enable": true,

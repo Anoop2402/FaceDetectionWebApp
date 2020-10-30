@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
+import Register from '../src/Components/Register/register';
+import SignIn from "../src/Components/SignIn/signin";
 import Clarifai, { COLOR_MODEL } from 'clarifai';
 import Navigation from '../src/Components/Navigation/navigation';
 import Logo from '../src/Components/Logo/logo';
@@ -23,7 +25,8 @@ class App extends Component  {
     this.state={
       input:'',
       imageURL:'',
-      box:{}
+      box:{},
+      route:'signin'
     }
 
   }
@@ -66,17 +69,34 @@ class App extends Component  {
                 
             }
 
+            onRouteChange=(route)=>
+            {
+              this.setState({route:route});
+            }
+
+
+
   render(){
         return (
         <div className="App">
         <Particles className='particles'
         params={ParticleConfig} />
+        
+         { this.state.route === 'home' 
+          ?   <div>
+                  <Navigation onRouteChange={this.onRouteChange} />
+                  <Logo />
+                  <Rank />
+                  <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
+                  <FaceRecognition box={this.state.box} imageURL={this.state.imageURL} />
+              </div>
+         : (
+              this.state.route === 'signin'
+              ? <SignIn onRouteChange={this.onRouteChange} />
+              : <Register onRouteChange={this.onRouteChange} />           
+         )
 
-          <Navigation /> 
-          <Logo />
-          <Rank />
-          <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
-          <FaceRecognition box={this.state.box} imageURL={this.state.imageURL} />
+         }
         </div>
       );
     }
