@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import Register from '../src/Components/Register/register';
 import SignIn from "../src/Components/SignIn/signin";
-import Clarifai, { COLOR_MODEL } from 'clarifai';
+import Clarifai from 'clarifai';
 import Navigation from '../src/Components/Navigation/navigation';
 import Logo from '../src/Components/Logo/logo';
 import FaceRecognition from "../src/Components/FaceRecogn/facerecog";
@@ -26,11 +26,32 @@ class App extends Component  {
       input:'',
       imageURL:'',
       box:{},
-      route:'signin'
+      route:'signin',
+      user:{
+        id:'128',
+        name:'',
+        email:'',
+        password:'',
+        entries:0,
+        joined:''
+        
+      }
     }
 
   }
 
+          loadUsers=(data)=>{
+            this.setState({user:{
+              id:data.id,
+              name:data.name,
+              email:data.email,
+              password:data.password,
+              entries:data.entries,
+              joined:data.joined
+            }})
+          }
+
+       
             calculateFaceLocation=(data)=>
             {
                     const boundingbox=data.outputs[0].data.regions[0].region_info.bounding_box;
@@ -65,7 +86,19 @@ class App extends Component  {
             {
                     this.setState({imageURL: this.state.input});
                     app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
-                    .then(response=>this.displayFaceBox(this.calculateFaceLocation(response))).catch(err=>console.log(err));
+                    .then(response=>{
+                      if(response){
+                        fetch('http://localhost:3001/image',{
+                          method:'put',
+                          headers:{'Content-Type':'application/json'},
+                          body:JSON.stringify({id:this.state.user.id})
+                        }).then(response=>response.json()
+                        ).then(count=>{this.setState(Object.assign(this.state.user,{entries:count}))
+                      })
+                      }
+                      this.displayFaceBox(this.calculateFaceLocation(response))
+                    })
+                    .catch(err=>console.log(err));
                 
             }
 
@@ -86,14 +119,14 @@ class App extends Component  {
           ?   <div>
                   <Navigation onRouteChange={this.onRouteChange} />
                   <Logo />
-                  <Rank />
+                  <Rank userName={this.state.user.name} entries={this.state.user.entries} />
                   <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
                   <FaceRecognition box={this.state.box} imageURL={this.state.imageURL} />
               </div>
          : (
               this.state.route === 'signin'
-              ? <SignIn onRouteChange={this.onRouteChange} />
-              : <Register onRouteChange={this.onRouteChange} />           
+              ? <SignIn loadUsers={this.loadUsers} onRouteChange={this.onRouteChange} />
+              : <Register loadUsers={this.loadUsers} onRouteChange={this.onRouteChange} />           
          )
 
          }
