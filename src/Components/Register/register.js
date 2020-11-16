@@ -30,7 +30,7 @@ onPasswordChange=(event)=>{
 }
 
 onSubmit=()=>{
-  fetch('http://localhost:3001/register', {
+  fetch('https://thawing-inlet-01460.herokuapp.com/register', {
     method:'post',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
