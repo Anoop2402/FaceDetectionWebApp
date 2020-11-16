@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import './App.css';
 import Register from '../src/Components/Register/register';
 import SignIn from "../src/Components/SignIn/signin";
-import Clarifai from 'clarifai';
 import Navigation from '../src/Components/Navigation/navigation';
 import Logo from '../src/Components/Logo/logo';
 import FaceRecognition from "../src/Components/FaceRecogn/facerecog";
@@ -13,29 +12,25 @@ import ParticleConfig from '../src/Components/Particles/particle';
 
 import 'tachyons';
 
-const app = new Clarifai.App({
-  apiKey: '4248fb4e992845b991a01a2295d999dd'
- });
 
-
-
+const initialState={
+  input:'',
+  imageURL:'',
+  box:{},
+  route:'signin',
+  user:{
+    id:'',
+    name:'',
+    email:'',
+    entries:0,
+    joined:''
+    
+  }
+} 
 class App extends Component  {
   constructor(){
     super();
-    this.state={
-      input:'',
-      imageURL:'',
-      box:{},
-      route:'signin',
-      user:{
-        id:'',
-        name:'',
-        email:'',
-        entries:0,
-        joined:''
-        
-      }
-    }
+    this.state=initialState;
 
   }
 
@@ -83,7 +78,13 @@ class App extends Component  {
             onButtonSubmit=(event)=>
             {
                     this.setState({imageURL: this.state.input});
-                    app.models.predict(Clarifai.FACE_DETECT_MODEL,this.state.input)
+
+                    fetch('http://localhost:3001/imgURL',{
+                      method:'post',
+                      headers:{'Content-Type':'application/json'},
+                      body:JSON.stringify({input:this.state.input})
+                    })
+                    .then(response=>response.json())
                     .then(response=>{
                       if(response){
                         fetch('http://localhost:3001/image',{
@@ -105,6 +106,11 @@ class App extends Component  {
 
             onRouteChange=(route)=>
             {
+              if(route==='signout')
+              {
+                this.setState(initialState)
+              
+              }
               this.setState({route:route});
             }
 
@@ -125,7 +131,7 @@ class App extends Component  {
                   <FaceRecognition box={this.state.box} imageURL={this.state.imageURL} />
               </div>
          : (
-              this.state.route === 'signin'
+              this.state.route === 'signin' || this.state.route === 'signout'
               ? <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
               : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />           
          )
