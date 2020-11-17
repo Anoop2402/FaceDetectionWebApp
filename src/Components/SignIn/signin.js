@@ -8,41 +8,64 @@ class SignIn extends React.Component{
     super(props)
     this.state={
       signInEmail:'',
-      signInPassword:''
+      signInPassword:'',
+      emailalert:''
     }
+   
   }
+  
   onEmailChange=(event)=>{
+    
+    
     this.setState({signInEmail: event.target.value})
+    if(this.state.signInEmail){
+      document.getElementById('email-validation').style.display='none';
+    }
+
 
   }
 
   onPasswordChange=(event)=>{
+    if(!this.state.signInEmail)
+    {
+      this.setState({emailalert:'Email field cannot be left blank'})
+      console.log(this.state.email);
+
+    }
     this.setState({signInPassword: event.target.value})
 
   }
 
   onSubmitSignIn=()=>{
-      fetch('https://thawing-inlet-01460.herokuapp.com/signin', {
-        method:'post',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          email: this.state.signInEmail,
-          password:this.state.signInPassword
-        })
-      })
-      .then(res=>res.json())
-      .then(user=>{
-        if(user.id)
-        {
-          this.props.loadUser(user);
-          this.props.onRouteChange('home');
- 
-        }
-        else
-        {
-          alert('please enter valid email or password');
-        }
-      })
+    if(!this.state.signInEmail || !this.state.password)
+    {
+      alert('Please enter the correct credentials');
+    }
+    else
+    {
+
+          fetch('https://thawing-inlet-01460.herokuapp.com/signin', {
+            method:'post',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              email: this.state.signInEmail,
+              password:this.state.signInPassword
+            })
+          })
+          .then(res=>res.json())
+          .then(user=>{
+            if(user.id)
+            {
+              this.props.loadUser(user);
+              this.props.onRouteChange('home');
+    
+            }
+            else
+            {
+              alert('please enter valid email or password');
+            }
+          })
+    }
   }
    render(){
      const {onRouteChange}=this.props;
@@ -55,6 +78,7 @@ class SignIn extends React.Component{
                   <div className="mt3">
                     <label className="db fw6 lh-copy f6" htmlFor="email-address">Email</label>
                     <input onChange={this.onEmailChange} className="pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="email" name="email-address"  id="email-address" />
+                    <small id="email-validation" class="f5 red b db mb2">{this.state.emailalert}</small>                    
                   </div>
                   <div className="mv3">
                     <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
